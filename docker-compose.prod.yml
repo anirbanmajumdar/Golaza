@@ -1,0 +1,28 @@
+# Production compose for any cloud VM. Only Caddy (host) is public on 80/443; the
+# containers bind to loopback. Caddy reverse-proxies everything to the
+# Next.js frontend, which in turn proxies /api/* to the backend over the
+# internal Docker network. Reads secrets from ./.env (see .env.example).
+
+services:
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    env_file: [.env]
+    environment:
+      WCB_DB_URL: sqlite:////app/data/golazo.db
+    volumes:
+      - golazo_data:/app/data
+    expose:
+      - "8000"
+
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    depends_on: [backend]
+    environment:
+      NEXT_PUBLIC_API_BASE: http://backend:8000
+    ports:
+      - "127.0.0.1:3030:3030"   # only reachable by Caddy on the host
+
+volumes:
+  golazo_data:

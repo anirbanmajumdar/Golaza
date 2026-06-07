@@ -1,0 +1,18 @@
+# python
+backend/.venv/
+__pycache__/
+*.pyc
+backend/data/
+*.db
+*.db-wal
+*.db-shm
+
+# node / next
+frontend/node_modules/
+frontend/.next/
+frontend/next-env.d.ts
+.DS_Store
+
+# secrets
+.env
+

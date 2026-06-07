@@ -1,0 +1,33 @@
+services:
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    environment:
+      WCB_SECRET_KEY: ${WCB_SECRET_KEY:-change-me-in-prod}
+      WCB_DB_URL: sqlite:////app/data/golazo.db
+      WCB_CORS_ORIGINS: '["http://localhost:3030","http://127.0.0.1:3030"]'
+      # OTP email (leave blank for dev mode where codes are logged/returned)
+      WCB_SMTP_HOST: ${WCB_SMTP_HOST:-}
+      WCB_SMTP_PORT: ${WCB_SMTP_PORT:-587}
+      WCB_SMTP_USER: ${WCB_SMTP_USER:-}
+      WCB_SMTP_PASSWORD: ${WCB_SMTP_PASSWORD:-}
+      WCB_SMTP_FROM: ${WCB_SMTP_FROM:-GOLAZO 2026 <no-reply@golazo.app>}
+      WCB_DEV_ECHO_OTP: ${WCB_DEV_ECHO_OTP:-true}
+    volumes:
+      - golazo_data:/app/data
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      # server-side proxy target; the browser only ever calls /api/*
+      NEXT_PUBLIC_API_BASE: http://backend:8000
+    ports:
+      - "3030:3030"
+
+volumes:
+  golazo_data:
